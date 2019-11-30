@@ -16,8 +16,6 @@ from commands import cmd_echo
 tuxVersion = "0.0"
 tuxRelease = "2019-11-30_1"
 client = discord.Client()
-config = None
-prefix = ""
 
 # Command List
 commands = {
@@ -29,12 +27,20 @@ def main():
 
 	#Load config file
 	print("TuxBot is starting...")
-	print("Loading config...")
-	config = loadConfig()
-	prefix = config["prefix"]
-
 	print("\n/////////////////////\n")
-	client.run(config["token"]) # Run the Bot
+	client.run(getConfig()["token"]) # Run the Bot
+
+
+def printStartMessages():
+	print("/////////////////////")
+	print("TuxBot Version: {0}".format(tuxVersion))
+	print("TuxBot Release: {0}".format(tuxRelease))
+	print("/////////////////////\n")
+
+
+def getConfig():
+	with open("../res/config.json", "r") as rawConfig:
+		return json.load(rawConfig)
 
 
 @client.event
@@ -49,24 +55,14 @@ async def on_message(message):
 	if message.author != client.user: # Check if the message was send by the bot or not
 		print("*******\nNew message recieved on server: {0}\nAuthor: {1}\nContent: {2}\n*******".format(message.guild, message.author, message.content)) # Print out message and some info
 
-		if message.content.startswith(prefix):
+		if message.content.startswith(getConfig()["prefix"]):
 			# Parse Command
-			invoke = message.content[len(prefix):].split(" ")[0]
+			invoke = message.content[len(getConfig()["prefix"]):].split(" ")[0]
 			args = message.content.split(" ")[1:]
 
-			if invoke
-
-
-def printStartMessages():
-	print("/////////////////////")
-	print("TuxBot Version: {0}".format(tuxVersion))
-	print("TuxBot Release: {0}".format(tuxRelease))
-	print("/////////////////////\n")
-
-
-def loadConfig():
-	with open("../res/config.json", "r") as rawConfig:
-		return json.load(rawConfig)
+			if commands.__contains__(invoke):
+				print("\n*******\nCommand {} invoked\n*******".format('"'+invoke+'"'))
+				await commands.get(invoke).ex(args, message, client, invoke)
 
 
 if __name__ == "__main__":
